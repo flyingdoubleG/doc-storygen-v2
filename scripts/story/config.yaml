@@ -4,19 +4,19 @@
 # the format is the same as the openai API, since VLLM also provides and openai-style API.
 
 defaults:
-  plan_path: output/plan.json
-  output_path: output/story.txt
-  output_pkl: output/story.pkl
-  intermediate_prefix: output/story_partial # prefixes for saving partial stories as we generate
+  plan_path: output/plan2-gpt3.5.json
+  output_path: output/story2-gpt3.5.txt
+  output_pkl: output/story2-gpt3.5.pkl
+  intermediate_prefix: output/story_partial2-gpt3.5 # prefixes for saving partial stories as we generate
   delete_old_intermediates: true
   logging_level: info # debug, info, warning, error, critical
   MODEL:
-    engine: TODO # TODO path/to/vllm-supported/hf/model, vllm-supported huggingface model string, or openai model string
+    engine: gpt-3.5-turbo-1106 # TODO path/to/vllm-supported/hf/model, vllm-supported huggingface model string, or openai model string
     tensor_parallel_size: 1 # TODO number of gpus to use
-    server_type: vllm # "vllm" or "openai"
+    server_type: openai # "vllm" or "openai"
     host: http://localhost # model server if using vllm
     port: 9741
-    prompt_format: llama2-chat # "none" (pretrained base model), "openai-chat", or "llama2-chat"; add other options in llm.py as needed
+    prompt_format: openai-chat # "none" (pretrained base model), "openai-chat", or "llama2-chat"; add other options in llm.py as needed
     # for the remaining args below, you can put these args here to be shared, or put specific ones under "title" and "premise" if you want different args
     temperature: 1
     top_p: 0.99
@@ -55,11 +55,14 @@ defaults:
         scorers: ['relevance', 'coherence', 'commentary', 'length']
         RELEVANCE:
           max_tokens: 5
-          logprobs: 5
+          logprobs: true
+          top_logprobs: 5
         COHERENCE:
           max_tokens: 5
-          logprobs: 5
+          logprobs: true
+          top_logprobs: 5
           max_prefix_passages: 10 # how many previous passages to include as context when asking for coherence with previous passages
         COMMENTARY:
           max_tokens: 5
-          logprobs: 5
+          logprobs: true
+          top_logprobs: 5

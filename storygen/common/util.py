@@ -5,7 +5,7 @@ import logging
 import re
 import signal
 
-
+import pdb
 import roman
 import Levenshtein
 from transformers import AutoTokenizer
@@ -109,17 +109,18 @@ def wrap_filter_for_tuple(filter, index=0):
 
 
 def extract_choice_logprobs(full_completion, choices=['yes', 'no'], default_logprobs=[-1e8, -1e8], case_sensitive=False):
+    # pdb.set_trace()
     batch_logprobs = []
     for choice in full_completion['choices']:
-        all_logprobs = choice['logprobs']['top_logprobs']
+        all_logprobs = choice['logprobs']['content']
         found = False
         logprobs = [l for l in default_logprobs]
         for token_logprobs in all_logprobs: # look for the first position that has yes or no in the top few logprobs
-            for key, value in token_logprobs.items():
+            for top_logprob in token_logprobs["top_logprobs"]:
                 for i, choice in enumerate(choices):
-                    if choice in key or (not case_sensitive and choice.lower() in key.lower()):
+                    if choice in top_logprob["token"] or (not case_sensitive and choice.lower() in top_logprob["token"].lower()):
                         found = True
-                        logprobs[i] = value
+                        logprobs[i] = top_logprob["logprob"]
             if found:
                 break
         batch_logprobs.append(log_softmax(logprobs))

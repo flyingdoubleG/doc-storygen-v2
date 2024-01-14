@@ -4,7 +4,7 @@ import logging
 import os
 
 import openai
-
+import pdb
 from storygen.common.server import ServerConfig
 from storygen.common.util import *
 
@@ -24,7 +24,8 @@ class SamplingConfig:
                  stop=None,
                  n=None,
                  logit_bias=None,
-                 logprobs=None):
+                 logprobs=None,
+                 top_logprobs=None):
         self.server_config = server_config
         self.prompt_format = prompt_format
         self.max_tokens = max_tokens
@@ -36,6 +37,7 @@ class SamplingConfig:
         self.n = n
         self.logit_bias = logit_bias
         self.logprobs = logprobs
+        self.top_logprobs = top_logprobs
     
     @staticmethod
     def from_config(config):
@@ -50,7 +52,8 @@ class SamplingConfig:
             stop=config.get('stop', None),
             n=config.get('n', None),
             logit_bias=config.get('logit_bias', None),
-            logprobs=config.get('logprobs', None)
+            logprobs=config.get('logprobs', None),
+            top_logprobs=config.get('top_logprobs', None)
         )
     
     def __getitem__(self, key):
@@ -58,7 +61,7 @@ class SamplingConfig:
     
     def dict(self):
         d = {'model': self.server_config.engine}
-        for attr in ['max_tokens', 'temperature', 'top_p', 'frequency_penalty', 'presence_penalty', 'stop', 'n', 'logit_bias', 'logprobs']:
+        for attr in ['max_tokens', 'temperature', 'top_p', 'frequency_penalty', 'presence_penalty', 'stop', 'n', 'logit_bias', 'logprobs', 'top_logprobs']:
             if getattr(self, attr) is not None:
                 d[attr] = getattr(self, attr)
         return d
@@ -69,10 +72,12 @@ class LLMClient:
         self.warned = {'vllm_logit_bias': False}
 
     def call_with_retry(self, prompt_builder, sampling_config, postprocessor=None, filter=lambda s: len(s.strip()) > 0, max_attempts=5, **kwargs):
+        # pdb.set_trace()
         for _ in range(max_attempts):
             try:
                 completions, full_completion_object = self(prompt_builder, sampling_config, **kwargs)
-            except:
+            except Exception as e:
+                raise e
                 continue
             if postprocessor is not None:
                 completions = postprocessor(completions, full_completion_object=full_completion_object)

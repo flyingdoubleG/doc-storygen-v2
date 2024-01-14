@@ -7,7 +7,7 @@ import pickle
 
 from storygen.plan.outline import *
 from storygen.story.story import *
-
+import pdb
 
 def generate_story(plan, story_config, story_prompts, llm_client, intermediate_save_prefix=None, delete_old_intermediates=True):
     beam = StoryBeam([Story(plan)])
@@ -238,6 +238,7 @@ def make_and_score_passages(raw_passages, story, node, story_config, story_promp
         aux_info = {}
         score = 0
         for scorer in story_config['score']['scorers']:
+            
             if scorer == 'coherence':
                 coherence_score = 0
                 if len(story.passages()) > 0:
@@ -255,8 +256,8 @@ def make_and_score_passages(raw_passages, story, node, story_config, story_promp
                         )
                         yes_no_logprobs = extract_choice_logprobs(coherence_score_completion, default_logprobs=[-1e8, -1e7])
                         coherence_score = yes_no_logprobs[0][0] # logprob of yes
-                    except:
-                        logging.warning(f"Failed to score coherence for passage: {passage_text}")
+                    except Exception as e:
+                        logging.warning(f"Failed to score coherence for passage: {passage_text} Error: {e}")
                         coherence_score = -1e10
                 score += coherence_score
                 aux_info['coherence_score'] = coherence_score
@@ -273,8 +274,8 @@ def make_and_score_passages(raw_passages, story, node, story_config, story_promp
                     )
                     yes_no_logprobs = extract_choice_logprobs(relevance_score_completion, default_logprobs=[-1e8, -1e7])
                     relevance_score = yes_no_logprobs[0][0] # logprob of yes
-                except:
-                    logging.warning(f"Failed to score relevance for passage: {passage_text}")
+                except Exception as e:
+                    logging.warning(f"Failed to score relevance for passage: {passage_text} Error: {e}")
                     relevance_score = -1e10
                 score += relevance_score
                 aux_info['relevance_score'] = relevance_score
@@ -296,8 +297,8 @@ def make_and_score_passages(raw_passages, story, node, story_config, story_promp
                         commentary_score = story_commentary_logprobs[0][0] # logprob of A (it's asking whether it's story or commentary; we want it to be a story)
                         # yes_no_logprobs = extract_choice_logprobs(commentary_score_completion)
                         # commentary_score = yes_no_logprobs[0][1] # logprob of no; we don't want commentary at the end
-                    except:
-                        logging.warning(f"Failed to score commentary for passage: {passage_text}")
+                    except Exception as e:
+                        logging.warning(f"Failed to score commentary for passage: {passage_text} Error: {e}")
                         commentary_score = -1e10
                 score += commentary_score
                 aux_info['commentary_score'] = commentary_score

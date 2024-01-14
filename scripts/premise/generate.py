@@ -2,7 +2,7 @@
 
 import argparse
 import os
-
+import pdb
 from pathlib import Path
 
 from storygen.common.llm.llm import *
@@ -26,6 +26,7 @@ if __name__=='__main__':
     llm_client = LLMClient()
 
     premise = Premise()
+    # pdb.set_trace()
     generate_title(premise, prompts['title'], config['model']['title'], llm_client)
     logging.info(f'Generated title: {premise.title}')
     generate_premise(premise, prompts['premise'], config['model']['premise'], llm_client)
